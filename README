@@ -1,0 +1,9 @@
+学习tensorflow的测试代码
+
+注意事项：
+1、windows下安装tensorflow需要64位的python3.5
+
+文件结构：
+1、code\mnist：从https://github.com/martin-gorner/tensorflow-mnist-tutorial复制一份，加上代码注释
+代码说明：https://zhuanlan.zhihu.com/p/25010476
+
