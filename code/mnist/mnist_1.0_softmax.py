@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import math
 import tensorflow as tf
 import tensorflowvisu
 from tensorflow.contrib.learn.python.learn.datasets.mnist import read_data_sets
@@ -116,7 +117,8 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 # training, learning rate = 0.005
 # 交叉熵计算乘以10，所以这里学习率应是0.5
-train_step = tf.train.GradientDescentOptimizer(0.5).minimize(cross_entropy)
+learn_rate = tf.placeholder(tf.float32)
+train_step = tf.train.GradientDescentOptimizer(learn_rate).minimize(cross_entropy)
 
 # matplotlib visualisation
 use_vis = False
@@ -134,15 +136,22 @@ init = tf.global_variables_initializer()
 sess = tf.Session()
 sess.run(init)
 
+def cal_learn_rate(i):
+    learn_rate_min = 0.01
+    learn_rate_max = 0.5
+    return learn_rate_min + (learn_rate_max - learn_rate_min) * math.exp(- i / count)
+
 # You can call this function in a loop to train the model, 100 images at a time
 def training_step(i, update_test_data, update_train_data):
     # training on batches of 100 images with 100 labels
     batch_X, batch_Y = mnist.train.next_batch(100)
+    train_feed_dict = {X: batch_X, Y_: batch_Y, learn_rate: cal_learn_rate(i)}
+    test_feed_dict = {X: mnist.test.images, Y_: mnist.test.labels, learn_rate: cal_learn_rate(i)}
 
     # compute training values for visualisation
     if use_vis:
         if update_train_data:
-            a, c, im, w, b = sess.run([accuracy, cross_entropy, I, allweights, allbiases], feed_dict={X: batch_X, Y_: batch_Y})
+            a, c, im, w, b = sess.run([accuracy, cross_entropy, I, allweights, allbiases], feed_dict = train_feed_dict)
             datavis.append_training_curves_data(i, a, c)
             datavis.append_data_histograms(i, w, b)
             datavis.update_image1(im)
@@ -150,22 +159,22 @@ def training_step(i, update_test_data, update_train_data):
 
         # compute test values for visualisation
         if update_test_data:
-            a, c, im = sess.run([accuracy, cross_entropy, It], feed_dict={X: mnist.test.images, Y_: mnist.test.labels})
+            a, c, im = sess.run([accuracy, cross_entropy, It], feed_dict = test_feed_dict)
             datavis.append_test_curves_data(i, a, c)
             datavis.update_image2(im)
             print(str(i) + ": ********* epoch " + str(i*100//mnist.train.images.shape[0]+1) + " ********* test accuracy:" + str(a) + " test loss: " + str(c))
     else:
         if update_train_data:
-            a, c = sess.run([accuracy, cross_entropy], feed_dict={X: batch_X, Y_: batch_Y})
+            a, c = sess.run([accuracy, cross_entropy], feed_dict = train_feed_dict)
             print(str(i) + ": accuracy:" + str(a) + " loss: " + str(c))
 
         # compute test values for visualisation
         if update_test_data:
-            a, c = sess.run([accuracy, cross_entropy], feed_dict={X: mnist.test.images, Y_: mnist.test.labels})
+            a, c = sess.run([accuracy, cross_entropy], feed_dict = test_feed_dict)
             print(str(i) + ": ********* epoch " + str(i*100//mnist.train.images.shape[0]+1) + " ********* test accuracy:" + str(a) + " test loss: " + str(c))
 
     # the backpropagation training step
-    sess.run(train_step, feed_dict={X: batch_X, Y_: batch_Y})
+    sess.run(train_step, feed_dict = train_feed_dict)
 
 if use_vis:
     datavis.animate(training_step, iterations=count, train_data_update_freq=10, test_data_update_freq=50, more_tests_at_start=True)
@@ -178,6 +187,7 @@ else:
 if use_vis:
     print("max test accuracy: " + str(datavis.get_max_test_accuracy()))
 else:
-    print(sess.run(accuracy, feed_dict={X: mnist.test.images, Y_: mnist.test.labels}))
+    test_feed_dict = {X: mnist.test.images, Y_: mnist.test.labels, learn_rate: 0.01}
+    print(sess.run(accuracy, feed_dict = test_feed_dict))
 
 # final max test accuracy = 0.9268 (10K iterations). Accuracy should peak above 0.92 in the first 2000 iterations.
