@@ -57,7 +57,30 @@ def test_init():
     run(v3)
     run(v4)
 
+def test_reshape():
+    # run(tf.reshape(a1, [1]))  #不能运行
+    # run(tf.reshape(a1, [0])) #不能运行
+    # run(tf.reshape(a1, [2])) #不能运行
+    # run(tf.reshape(a1, [2, -1]))  #没变
+    # run(tf.reshape(a1, [3, 2])) #[[1, 1], [1, 2], [3, 4]]
+    # run(tf.reshape(a1, [-1, 2]))  #[[1, 1], [1, 2], [3, 4]]
+    # run(tf.reshape(a1, [1, 6]))  #[[1 1 1 2 3 4]]
+    run(tf.reshape(a1, [1, 1, 6]))  #[[[1 1 1 2 3 4]]]
+    # run(tf.reshape(a1, [6, 1]))  #[[1] [1] [1] [2] [3] [4]]
+    # run(tf.reshape(a1, [-1]))  #[1 1 1 2 3 4]
+
+def test_concat():
+    # run(tf.concat([a3, a3]))  # 不能运行
+    # run(tf.concat([a3, a3], 0))  #[1 2 3 4 1 2 3 4]
+    # run(tf.concat([a3, a3, a3], 0))  #[1 2 3 4 1 2 3 4 1 2 3 4]
+    # run(tf.concat([a3, a3], 1))  # 不能运行
+    # run(tf.concat([a3, a3], -1))  # [1 2 3 4 1 2 3 4]
+
+    # run(tf.concat([a1, a2], 0))  #[[1 1 1] [2 3 4] [1 1 1] [2 3 4]]
+    # run(tf.concat([a1, a2], 1))  #[[1 1 1 1 1 1] [2 3 4 2 3 4]]
+    # run(tf.concat([a1, a2], -1))  #[[1 1 1 1 1 1] [2 3 4 2 3 4]]
+    # run(tf.concat([tf.reshape(a1, [-1]), tf.reshape(a1, [-1])], 0)) #[1 1 1 2 3 4 1 1 1 2 3 4]
+    run(tf.concat([tf.reshape(a1, [-1]), tf.reshape(a1, [-1])], 1)) # 不能运行
+
 if __name__ == '__main__':
-    test_init()
-
-
+    test_concat()

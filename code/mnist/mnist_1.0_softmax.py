@@ -211,3 +211,23 @@ else:
     print(sess.run(accuracy, feed_dict = test_feed_dict))
 
 # final max test accuracy = 0.9268 (10K iterations). Accuracy should peak above 0.92 in the first 2000 iterations.
+
+# Some results to expect:
+# (In all runs, if sigmoids are used, all biases are initialised at 0, if RELUs are used,
+# all biases are initialised at 0.1 apart from the last one which is initialised at 0.)
+
+## test with and without dropout, decaying learning rate from 0.003 to 0.0001 decay_speed 2000, 10K iterations
+# final test accuracy = 0.9817 (relu, dropout 0.75, training cross-entropy still a bit noisy, test cross-entropy stable, test accuracy stable just under 98.2)
+# final test accuracy = 0.9824 (relu, no dropout, training cross-entropy down to 0, test cross-entropy goes up significantly, test accuracy stable around 98.2)
+
+## learning rate = 0.003, 10K iterations, no dropout
+# final test accuracy = 0.9788 (sigmoid - slow start, training cross-entropy not stabilised in the end)
+# final test accuracy = 0.9825 (relu - above 0.97 in the first 1500 iterations but noisy curves)
+
+## now with learning rate = 0.0001, 10K iterations, no dropout
+# final test accuracy = 0.9722 (relu - slow but smooth curve, would have gone higher in 20K iterations)
+
+## decaying learning rate from 0.003 to 0.0001 decay_speed 2000, 10K iterations, no dropout
+# final test accuracy = 0.9746 (sigmoid - training cross-entropy not stabilised)
+# final test accuracy = 0.9824 (relu, training cross-entropy down to 0, test cross-entropy goes up significantly, test accuracy stable around 98.2)
+# on another run, peak at 0.9836
