@@ -121,14 +121,17 @@ learn_rate = tf.placeholder(tf.float32)
 train_step = tf.train.GradientDescentOptimizer(learn_rate).minimize(cross_entropy)
 
 # matplotlib visualisation
-use_vis = False
+# 0表示没有图像，1表示较少的图像，2表示较多的图像
+vis_level = 1
 count = 2001
 
-if use_vis:
+if vis_level > 1:
     allweights = tf.reshape(W, [-1])
     allbiases = tf.reshape(b, [-1])
     I = tensorflowvisu.tf_format_mnist_images(X, Y, Y_)  # assembles 10x10 images by default
     It = tensorflowvisu.tf_format_mnist_images(X, Y, Y_, 1000, lines=25)  # 1000 images on 25 lines
+
+if vis_level > 0:
     datavis = tensorflowvisu.MnistDataVis()
 
 # init
@@ -149,19 +152,23 @@ def training_step(i, update_test_data, update_train_data):
     test_feed_dict = {X: mnist.test.images, Y_: mnist.test.labels, learn_rate: cal_learn_rate(i)}
 
     # compute training values for visualisation
-    if use_vis:
+    if vis_level > 0:
         if update_train_data:
-            a, c, im, w, b = sess.run([accuracy, cross_entropy, I, allweights, allbiases], feed_dict = train_feed_dict)
+            a, c = sess.run([accuracy, cross_entropy], feed_dict = train_feed_dict)
             datavis.append_training_curves_data(i, a, c)
-            datavis.append_data_histograms(i, w, b)
-            datavis.update_image1(im)
+            if vis_level > 1:
+                im, w, b = sess.run([I, allweights, allbiases], feed_dict = train_feed_dict)
+                datavis.append_data_histograms(i, w, b)
+                datavis.update_image1(im)
             print(str(i) + ": accuracy:" + str(a) + " loss: " + str(c))
 
         # compute test values for visualisation
         if update_test_data:
-            a, c, im = sess.run([accuracy, cross_entropy, It], feed_dict = test_feed_dict)
+            a, c = sess.run([accuracy, cross_entropy], feed_dict = test_feed_dict)
             datavis.append_test_curves_data(i, a, c)
-            datavis.update_image2(im)
+            if vis_level > 1:
+                im = sess.run(It, feed_dict = test_feed_dict)
+                datavis.update_image2(im)
             print(str(i) + ": ********* epoch " + str(i*100//mnist.train.images.shape[0]+1) + " ********* test accuracy:" + str(a) + " test loss: " + str(c))
     else:
         if update_train_data:
@@ -176,7 +183,7 @@ def training_step(i, update_test_data, update_train_data):
     # the backpropagation training step
     sess.run(train_step, feed_dict = train_feed_dict)
 
-if use_vis:
+if vis_level > 0:
     datavis.animate(training_step, iterations=count, train_data_update_freq=10, test_data_update_freq=50, more_tests_at_start=True)
 else:
     # to save the animation as a movie, add save_movie=True as an argument to datavis.animate
@@ -184,7 +191,7 @@ else:
     # for i in range(count): training_step(i, False, False)
     for i in range(count): training_step(i, i % 50 == 0, i % 10 == 0)
 
-if use_vis:
+if vis_level > 0:
     print("max test accuracy: " + str(datavis.get_max_test_accuracy()))
 else:
     test_feed_dict = {X: mnist.test.images, Y_: mnist.test.labels, learn_rate: 0.01}
