@@ -38,6 +38,9 @@ W = tf.Variable(tf.zeros([784, 10]))
 # biases b[10]
 b = tf.Variable(tf.zeros([10]))
 
+# feed in 1 when testing, 0.75 when training
+pkeep = tf.placeholder(tf.float32)
+
 def one_layer_mode():
     # The model
     # tf.matmul是矩阵乘法
@@ -63,6 +66,11 @@ def create_multi_layer(layers_dim):
             # sigmoid较难收敛，用relu代替
             # last_op = tf.nn.sigmoid(last_op)
             last_op = tf.nn.relu(last_op)
+            # 可能过拟合，使用dropout每次随机禁用一些神经元
+            # 同时等比例地促进剩余神经元的输出，以确保下一层的激活不会移动
+            # 但是由于禁用的一些神经元，因此会导致准确度降低，导致出现准确率曲线不稳定
+            # 训练时可以把pkeep设为小于1，测试时要pkeep = 1
+            last_op = tf.nn.dropout(last_op, pkeep)
 
     return last_op
 
@@ -118,11 +126,15 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 # training, learning rate = 0.005
 # 交叉熵计算乘以10，所以这里学习率应是0.5
 learn_rate = tf.placeholder(tf.float32)
-train_step = tf.train.GradientDescentOptimizer(learn_rate).minimize(cross_entropy)
+# GradientDescentOptimizer可能在鞍点处梯度为0，导致卡住，不能到达局部极小值点
+# train_step = tf.train.GradientDescentOptimizer(learn_rate).minimize(cross_entropy)
+# AdamOptimizer有一定的惯性，能越过鞍点，但是如果学习率较高，由于惯性可能导致震荡无法收敛
+# 学习率相对GradientDescentOptimizer最后缩小100倍?
+train_step = tf.train.AdamOptimizer(learn_rate).minimize(cross_entropy)
 
 # matplotlib visualisation
 # 0表示没有图像，1表示较少的图像，2表示较多的图像
-vis_level = 1
+vis_level = 0
 count = 2001
 
 if vis_level > 1:
@@ -140,16 +152,17 @@ sess = tf.Session()
 sess.run(init)
 
 def cal_learn_rate(i):
-    learn_rate_min = 0.01
-    learn_rate_max = 0.5
+    learn_rate_min = 0.0001
+    learn_rate_max = 0.005
     return learn_rate_min + (learn_rate_max - learn_rate_min) * math.exp(- i / count)
+    # return learn_rate_max
 
 # You can call this function in a loop to train the model, 100 images at a time
 def training_step(i, update_test_data, update_train_data):
     # training on batches of 100 images with 100 labels
     batch_X, batch_Y = mnist.train.next_batch(100)
-    train_feed_dict = {X: batch_X, Y_: batch_Y, learn_rate: cal_learn_rate(i)}
-    test_feed_dict = {X: mnist.test.images, Y_: mnist.test.labels, learn_rate: cal_learn_rate(i)}
+    train_feed_dict = {X: batch_X, Y_: batch_Y, learn_rate: cal_learn_rate(i), pkeep: 0.75}
+    test_feed_dict = {X: mnist.test.images, Y_: mnist.test.labels, learn_rate: cal_learn_rate(i), pkeep: 1}
 
     # compute training values for visualisation
     if vis_level > 0:
@@ -194,7 +207,7 @@ else:
 if vis_level > 0:
     print("max test accuracy: " + str(datavis.get_max_test_accuracy()))
 else:
-    test_feed_dict = {X: mnist.test.images, Y_: mnist.test.labels, learn_rate: 0.01}
+    test_feed_dict = {X: mnist.test.images, Y_: mnist.test.labels, learn_rate: 0.01, pkeep: 1}
     print(sess.run(accuracy, feed_dict = test_feed_dict))
 
 # final max test accuracy = 0.9268 (10K iterations). Accuracy should peak above 0.92 in the first 2000 iterations.
