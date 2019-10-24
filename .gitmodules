@@ -1,0 +1,9 @@
+[submodule "modules/tensorflow2_tutorials_chinese"]
+	path = modules/tensorflow2_tutorials_chinese
+	url = git@github.com:czy36mengfei/tensorflow2_tutorials_chinese.git
+[submodule "modules/tensorflow"]
+	path = modules/tensorflow
+	url = https://github.com/tensorflow/tensorflow.git
+[submodule "modules/tensorflow-without-a-phd"]
+	path = modules/tensorflow-without-a-phd
+	url = git@github.com:GoogleCloudPlatform/tensorflow-without-a-phd.git
