@@ -1,2 +1,6 @@
 .vscode
 .ipynb_checkpoints
+logs
+weights
+models
+*.png

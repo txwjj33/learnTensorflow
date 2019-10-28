@@ -1,13 +1,15 @@
-学习tensorflow的测试代码
-
-注意事项：
-1、windows下安装tensorflow需要64位的python3.5
-
-文件结构：
-1、code\mnist：从https://github.com/martin-gorner/tensorflow-mnist-tutorial复制一份，加上代码注释
-代码说明：https://zhuanlan.zhihu.com/p/25010476
-
-tensorflow2.0教程：
+教程：
 1、官方文档：https://www.tensorflow.org/
 2、https://zhuanlan.zhihu.com/p/59507137
+3、https://zhuanlan.zhihu.com/p/25010476
+
+备注事项：
+1、vscode里面keras报错和没法自动补全的问题是tensorflow2.0的bug，安装2.0.0b1版本就好了
+2、解决Failed to import pydot，1）pip install pydot 2）brew install graphviz
+3、安装graphviz的时候出现以下错误：
+    1）Error: Xcode alone is not sufficient on Mojave.解决办法：
+       xcode-select --install）
+    2）Permission denied @ dir_s_mkdir - /usr/local/Frameworks 解决办法：
+       sudo mkdir /usr/local/Frameworks
+       sudo chown $(whoami):admin /usr/local/Frameworks
 
