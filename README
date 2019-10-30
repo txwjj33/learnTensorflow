@@ -1,7 +1,8 @@
 教程：
 1、官方文档：https://www.tensorflow.org/
-2、https://zhuanlan.zhihu.com/p/59507137
-3、https://zhuanlan.zhihu.com/p/25010476
+2、keras中文文档：https://keras.io/zh/layers/pooling/
+3、https://zhuanlan.zhihu.com/p/59507137
+4、https://zhuanlan.zhihu.com/p/25010476
 
 备注事项：
 1、vscode里面keras报错和没法自动补全的问题是tensorflow2.0的bug，安装2.0.0b1版本就好了

@@ -7,3 +7,6 @@
 [submodule "modules/tensorflow-without-a-phd"]
 	path = modules/tensorflow-without-a-phd
 	url = git@github.com:GoogleCloudPlatform/tensorflow-without-a-phd.git
+[submodule "modules/keras"]
+	path = modules/keras
+	url = git@github.com:keras-team/keras.git
